@@ -18,12 +18,21 @@ prompt = ChatPromptTemplate([
     MessagesPlaceholder("user_input")
 ])
 
+def _check_question_format(inputs):
+    if not isinstance(inputs, list):
+        return "Output format is invalid."
+
+    for input in inputs:
+        if not isinstance(input, dict) or "number" not in input or "question" not in input:
+            return "Question number format is invalid."
+    return inputs
+
 parser = JsonOutputParser()
 
 model = init_chat_model(MODEL, model_provider="groq")
-chain = prompt | model | parser
+chain = prompt | model | parser | _check_question_format
 
-question = ("Give me 3 questions of physics for 5 grade."
+question = ("Give me 3 questions of physics for 5 grade. "
             "In the format of json list of questions and each question have key 'number' and 'question'. "
             "Output must be a list. nothing else")
 input_data = {"user_input": [HumanMessage(content=question)]}
